@@ -87,32 +87,34 @@ def close_db(error):
 
 
 # Function to add a score to the database
-def add_score(name, score):
+def add_score(name, game, score):
     """Inserts a new score into the database.
 
     Args:
         name (str): The name of the player.
+        game (str): The game the highscore is from.
         score (int): The score of the player.
     """
     conn = get_db()  # Get a database connection
-    conn.execute('INSERT INTO high_scores (name, score) VALUES (?, ?)', (name, score))  # Insert the score into the database
+    conn.execute('INSERT INTO high_scores (name, game ,score) VALUES (?, ? ,?)', (name, game, score))  # Insert the score into the database
     conn.commit()  # Commit the transaction
     conn.close()  # Close the connection
 
 
 # Function to retrieve high scores from the database
-def get_high_scores(limit=10):
+def get_high_scores(type_game, limit=10):
     """Retrieves high scores from the database.
 
     Args:
+        type_game (str): The specific game to retrieve highscores from
         limit (int, optional): The number of top scores to retrieve. Defaults to 10.
 
     Returns:
         list: A list of tuples containing the name and score of the top players.
     """
     conn = get_db()  # Get a database connection
-    scores = conn.execute('SELECT name, score FROM high_scores ORDER BY score DESC LIMIT ?',
-                          (limit,)).fetchall()  # Retrieve the top scores
+    scores = conn.execute('SELECT name, score FROM high_scores WHERE game = ? ORDER BY score DESC LIMIT ?',
+                          (type_game,limit,)).fetchall()  # Retrieve the top scores
     conn.close()  # Close the connection
     return scores  # Return the scores
 
@@ -134,7 +136,7 @@ def add_score_route():
         Response: A JSON response indicating success.
     """
     score_data = request.json  # Get the JSON data from the request
-    add_score(score_data['name'], score_data['score'])  # Add the score to the database
+    add_score(score_data['name'], score_data['game'], score_data['score'])  # Add the score to the database
     return jsonify({'message': 'Score added successfully!'}), 201  # Return a success message
 
 
@@ -202,7 +204,7 @@ def hilo():
         final_points = session['hilo_points']
         session['hilo_points'] = 100  # Reset game points
         session['hilo_errors'] = 3  # Reset errors
-        top_scores = get_high_scores()  # Get high scores
+        top_scores = get_high_scores('hilo')  # Get high scores
         return render_template('hilo_gameover.html',
                                points=final_points,
                                top_scores=top_scores)  # Render game over template
