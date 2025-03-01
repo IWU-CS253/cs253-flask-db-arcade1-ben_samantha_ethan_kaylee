@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, request, jsonify, render_template, session, g
 import sqlite3
 import os
@@ -251,6 +253,34 @@ def hilo_guess():
                            number_first=number_first,
                            number_second=number_second,
                            result=result)  # Render the result page with data
+
+
+# route to handle new unscramble game
+@app.route('/unscramble')
+def unscramble():
+    """
+    Initializes the Unscramble game
+
+    :return: rendered HTML for Unscramble game
+    """
+    uncsr_points = 10
+
+    # random words generated with https://www.randomlists.com/random-words?dup=false&qty=50
+    possible_words = ["popcorn", "aromatic", "doubt", "flame", "lonely", "pricey", "shiver", "trade", "decision", "name",
+                      "celery", "joyous", "windy", "macabre", "duck", "thinkable", "dizzy", "notebook", "four", "simple",
+                      "apple", "glossy", "helpless", "bubble", "squeamish", "sturdy", "outrageous", "crowded", "neighborly",
+                      "produce", "veil", "pine", "dirty", "juicy", "glib", "leather", "quack", "scrub", "nebulous", "lake",
+                      "internal", "verdant", "flesh", "excuse", "lunchroom", "father", "bait", "delay", "scratch", "tramp"]
+
+    random_index = random.randint(0, len(possible_words))
+    unscrambled = possible_words[random_index]
+    word_list = list(unscrambled)
+
+    scrambled = ''.join(random.sample(word_list, len(word_list)))
+
+    render_template('unscramble.html',
+                    uncsr_points=uncsr_points,
+                    scrambled=scrambled)
 
 
 # Run the application
