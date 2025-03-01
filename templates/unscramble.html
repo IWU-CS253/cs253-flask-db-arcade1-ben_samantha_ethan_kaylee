@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}Unscramble{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Unscramble</h1>
+        <h3>{{ scrambled }}</h3>
+        <div class="alert alert-info p-2" role="alert">
+            Points = {{ unscr_points }}
+        </div>
+    </div>
+
+        <form action="{{ url_for('unscramble_guess') }}" method="post" class="mt-4" id="guessForm">
+            <input type="hidden" name="scrambled" value="{{ scrambled }}">
+            <input type="hidden" name="unscrambled" value="{{ unscrambled }}">
+            <input type="hidden" name="unscr_points" value="{{ unscr_points }}">
+            <input type="text" name="word_guess" id="wordGuess">
+
+            <button type="button" class="btn btn-success btn-lg mt-3" onclick="submitGuess()">Guess</button>
+        </form>
+
+        <script>
+            function submitGuess() {
+                document.getElementById('guessForm').submit();
+            }
+        </script>
+    </div>
+{% endblock %}

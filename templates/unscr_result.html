@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}Unscrambled{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Unscramble Game</h1>
+
+    <div class="alert alert-secondary" role="alert">
+        Scrambled: {{ scr }}
+    </div>
+
+    <div class="alert {% if result == 'correct' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+        You were {{ result }}.
+        {% if result == "correct" %}
+            <p>You win!</p>
+        {% else %}
+            <p>- 1 point</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <form action="{{ url_for('unscramble') }}" method="get">
+            <button type="submit" class="btn btn-primary">Continue</button>
+        </form>
+    </div>
+</div>
+
+
+    <script>
+
+        function win() {
+            (document.getElementById('scoreForm').addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                // Simplified conversion of FormData to JSON Object
+                var formData = new FormData(this);
+                var jsonObject = Object.fromEntries(formData.entries());
+
+                fetch('/add_score', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jsonObject),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('responseMessage').textContent = data.message;
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            }));
+        };
+        </script>
+
+{% endblock %}
