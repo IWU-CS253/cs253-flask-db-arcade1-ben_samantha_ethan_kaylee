@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, request, jsonify, render_template, session, g
 import sqlite3
 import os
@@ -252,6 +254,71 @@ def hilo_guess():
     return render_template('hilo_result.html',
                            number_first=number_first,
                            number_second=number_second,
+                           result=result)  # Render the result page with data
+
+
+# route to handle new unscramble game
+@app.route('/unscramble')
+def unscramble():
+    """
+    Initializes the Unscramble game
+
+    :return: rendered HTML for Unscramble game
+    """
+    if 'unscr_points' not in session:
+        session['unscr_points'] = 10
+    unscr_points = session['unscr_points']
+
+    if unscr_points == 0:
+        session['unscr_points'] = 10
+
+    # random words generated with https://www.randomlists.com/random-words?dup=false&qty=50
+    possible_words = ["popcorn", "aromatic", "doubt", "flame", "lonely", "pricey", "shiver", "trade", "decision", "name",
+                      "celery", "joyous", "windy", "macabre", "duck", "thinkable", "dizzy", "notebook", "four", "simple",
+                      "apple", "glossy", "helpless", "bubble", "squeamish", "sturdy", "outrageous", "crowded", "neighborly",
+                      "produce", "veil", "pine", "dirty", "juicy", "glib", "leather", "quack", "scrub", "nebulous", "lake",
+                      "internal", "verdant", "flesh", "excuse", "lunchroom", "father", "bait", "delay", "scratch", "tramp"]
+
+    random_index = random.randint(0, len(possible_words))
+    unscrambled = possible_words[random_index]
+    word_list = list(unscrambled)
+
+    scrambled = ''.join(random.sample(word_list, len(word_list)))
+
+    return render_template('unscramble.html',
+                           unscr_points=unscr_points,
+                           scrambled=scrambled, unscrambled=unscrambled)
+
+
+@app.route('/unscramble_guess', methods=['POST'])
+def unscramble_guess():
+    """Handles the POST request for Unscramble game guesses.
+
+    Returns:
+        Response: The rendered HTML of the result page.
+    """
+
+    word_guess = request.form.get('word_guess')  # Get the player's guess from the form
+    unscr_points = int(request.form.get('unscr_points'))  # Get the points from the form
+    unscr = request.form.get('unscrambled')  # Get the correct answer from the form
+    scr = request.form.get('scrambled')
+
+    if word_guess == unscr:
+        result = 'correct'
+        final_points = unscr_points
+        session['unscer_points'] = 10
+        top_scores = get_high_scores('unscr')  # Get high scores
+        return render_template('unscr_gameover.html',
+                               points=final_points,
+                               top_scores=top_scores)
+
+    else:
+        result = 'incorrect'
+        session['unscr_points'] -= 1  # Decrease points if guess is incorrect
+
+    return render_template('unscr_result.html',
+                           unscr=unscr,
+                           scr=scr,
                            result=result)  # Render the result page with data
 
 
